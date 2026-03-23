@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Action, ActionTier, UserProgress, UserTrophy, ActionWithProgress, TierType } from '../types/database'
+import type { Action, ActionTier, UserProgress, UserTrophy, UserActiveAction, ActionWithProgress, TierType } from '../types/database'
 
 // Get today's date in YYYY-MM-DD format
 const getTodayDate = () => new Date().toISOString().split('T')[0]
@@ -58,7 +58,7 @@ export function useActions(userId: string | undefined) {
 
       if (activeError) throw activeError
 
-      const activeActionIds = new Set((activeData || []).map(a => a.action_id))
+      const activeActionIds = new Set((activeData as UserActiveAction[] || []).map(a => a.action_id))
 
       // Combine data for all actions
       const combined: ActionWithProgress[] = (actionsData as Action[]).map((action) => {
@@ -150,13 +150,14 @@ export function useActions(userId: string | undefined) {
 
       // Insert new active actions for today
       if (actionIds.length > 0) {
+        const insertData: Array<{ user_id: string; action_id: string; added_date: string }> = actionIds.map(actionId => ({
+          user_id: userId,
+          action_id: actionId,
+          added_date: today
+        }))
         const { error: insertError } = await supabase
           .from('user_active_actions')
-          .insert(actionIds.map(actionId => ({
-            user_id: userId,
-            action_id: actionId,
-            added_date: today
-          })))
+          .insert(insertData)
 
         if (insertError) throw insertError
       }

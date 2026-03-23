@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import type { TierType, TrophyWithAction } from '../types/database'
+import type { TrophyWithAction, UserTrophy, Action, ActionTier } from '../types/database'
 
 interface TrophyCounts {
   bronze: number
@@ -50,10 +50,15 @@ export function useTrophies(userId: string | undefined) {
 
       if (tiersError) throw tiersError
 
+      // Cast data to proper types
+      const trophiesList = trophiesData as UserTrophy[]
+      const actionsList = actionsData as Action[]
+      const tiersList = tiersData as ActionTier[]
+
       // Combine data
-      const combined: TrophyWithAction[] = trophiesData.map(trophy => {
-        const action = actionsData.find(a => a.id === trophy.action_id)!
-        const tier = tiersData.find(t =>
+      const combined: TrophyWithAction[] = trophiesList.map(trophy => {
+        const action = actionsList.find(a => a.id === trophy.action_id)!
+        const tier = tiersList.find(t =>
           t.action_id === trophy.action_id && t.tier_type === trophy.tier_type
         )!
         return { ...trophy, action, tier }
@@ -63,11 +68,11 @@ export function useTrophies(userId: string | undefined) {
 
       // Calculate counts
       const newCounts: TrophyCounts = {
-        bronze: trophiesData.filter(t => t.tier_type === 'bronze').length,
-        silver: trophiesData.filter(t => t.tier_type === 'silver').length,
-        gold: trophiesData.filter(t => t.tier_type === 'gold').length,
-        platinum: trophiesData.filter(t => t.tier_type === 'platinum').length,
-        total: trophiesData.length
+        bronze: trophiesList.filter(t => t.tier_type === 'bronze').length,
+        silver: trophiesList.filter(t => t.tier_type === 'silver').length,
+        gold: trophiesList.filter(t => t.tier_type === 'gold').length,
+        platinum: trophiesList.filter(t => t.tier_type === 'platinum').length,
+        total: trophiesList.length
       }
       setCounts(newCounts)
     } catch (err) {

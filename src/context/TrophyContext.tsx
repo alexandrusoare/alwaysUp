@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback } from 'react'
+import type { ReactNode } from 'react'
 import type { TierType } from '../types/database'
 
 interface TrophyNotification {
@@ -32,7 +33,7 @@ export function TrophyProvider({ children }: { children: ReactNode }) {
   const [currentTrophy, setCurrentTrophy] = useState<TrophyNotification | null>(null)
   const [currentLevelUp, setCurrentLevelUp] = useState<LevelUpNotification | null>(null)
   const [currentXpGain, setCurrentXpGain] = useState<number | null>(null)
-  const [notificationQueue, setNotificationQueue] = useState<Array<() => void>>([])
+  const [, setNotificationQueue] = useState<Array<() => void>>([])
 
   const processQueue = useCallback(() => {
     setNotificationQueue(prev => {

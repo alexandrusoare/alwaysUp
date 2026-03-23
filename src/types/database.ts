@@ -41,6 +41,13 @@ export interface UserStats {
   updated_at: string
 }
 
+export interface UserActiveAction {
+  id: string
+  user_id: string
+  action_id: string
+  added_date: string
+}
+
 // XP values for different actions
 export const XP_VALUES = {
   ACTION_COMPLETE: 5,    // XP per daily action completion
@@ -121,6 +128,11 @@ export interface Database {
         Row: UserStats
         Insert: Omit<UserStats, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<UserStats, 'id'>>
+      }
+      user_active_actions: {
+        Row: UserActiveAction
+        Insert: Omit<UserActiveAction, 'id'>
+        Update: Partial<Omit<UserActiveAction, 'id'>>
       }
     }
   }
