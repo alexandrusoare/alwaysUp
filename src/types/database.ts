@@ -1,10 +1,21 @@
 export type TierType = 'bronze' | 'silver' | 'gold' | 'platinum'
 
+export type SpecialActionType = 'water_tracking' | null
+
+export interface WaterTrackingConfig {
+  unit: string           // 'ml'
+  per_increment: number  // 250 (ml per cup)
+  daily_goal: number     // 2000 (2L)
+  increment_name: string // 'cup'
+}
+
 export interface Action {
   id: string
   name: string
   description: string | null
   icon_name: string | null
+  special_type: SpecialActionType
+  special_config: WaterTrackingConfig | null
   created_at: string
 }
 
@@ -92,12 +103,25 @@ export interface ActionWithProgress extends Action {
   tiers: ActionTier[]
   progress: UserProgress | null
   unlockedTiers: TierType[]
+  dailyTracking?: UserDailyTracking | null  // For special actions like water
 }
 
 // Trophy with action info for display
 export interface TrophyWithAction extends UserTrophy {
   action: Action
   tier: ActionTier
+}
+
+// Daily tracking for special actions (water, etc.)
+export interface UserDailyTracking {
+  id: string
+  user_id: string
+  action_id: string
+  date: string
+  current_value: number  // e.g., 1500 for ml of water
+  goal_reached: boolean
+  created_at: string
+  updated_at: string
 }
 
 // Database type for Supabase client
@@ -133,6 +157,11 @@ export interface Database {
         Row: UserActiveAction
         Insert: Omit<UserActiveAction, 'id'>
         Update: Partial<Omit<UserActiveAction, 'id'>>
+      }
+      user_daily_tracking: {
+        Row: UserDailyTracking
+        Insert: Omit<UserDailyTracking, 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Omit<UserDailyTracking, 'id'>>
       }
     }
   }

@@ -12,10 +12,10 @@ export function useActions(userId: string | undefined) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchActions = useCallback(async () => {
+  const fetchActions = useCallback(async (showLoading = false) => {
     if (!userId) return
 
-    setLoading(true)
+    if (showLoading) setLoading(true)
     try {
       // Fetch all actions
       const { data: actionsData, error: actionsError } = await supabase
@@ -170,7 +170,7 @@ export function useActions(userId: string | undefined) {
   }
 
   useEffect(() => {
-    fetchActions()
+    fetchActions(true) // Show loading only on initial load
   }, [fetchActions])
 
   return {

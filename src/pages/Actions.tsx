@@ -4,6 +4,7 @@ import { useActions } from '../hooks/useActions'
 import { useStats } from '../hooks/useStats'
 import { useTrophyPopup } from '../context/TrophyContext'
 import { ActionCard } from '../components/ActionCard'
+import { WaterActionCard } from '../components/WaterActionCard'
 import { AddActionModal } from '../components/AddActionModal'
 
 const actionIcons: Record<string, string> = {
@@ -31,7 +32,9 @@ const actionIcons: Record<string, string> = {
   callmom: '📞',
   family: '👨‍👩‍👧‍👦',
   flight: '✈️',
-  hotel: '🏨'
+  hotel: '🏨',
+  atm: '🏧',
+  water: '💧'
 }
 
 export function Actions() {
@@ -153,14 +156,25 @@ export function Actions() {
           </div>
         ) : (
           actions.map(action => (
-            <ActionCard
-              key={action.id}
-              action={action}
-              userId={user!.id}
-              onComplete={refetch}
-              onXpGain={handleXpGain}
-              onRemove={() => handleRemoveAction(action.id)}
-            />
+            action.special_type === 'water_tracking' ? (
+              <WaterActionCard
+                key={action.id}
+                action={action}
+                userId={user!.id}
+                onComplete={refetch}
+                onXpGain={handleXpGain}
+                onRemove={() => handleRemoveAction(action.id)}
+              />
+            ) : (
+              <ActionCard
+                key={action.id}
+                action={action}
+                userId={user!.id}
+                onComplete={refetch}
+                onXpGain={handleXpGain}
+                onRemove={() => handleRemoveAction(action.id)}
+              />
+            )
           ))
         )}
       </div>

@@ -10,7 +10,7 @@ import { isToday, parseISO } from 'date-fns'
 interface Props {
   action: ActionWithProgress
   userId: string
-  onComplete: () => void
+  onComplete: () => Promise<void> | void
   onXpGain: (xp: number, leveledUp: boolean, newLevel: number) => void
   onRemove?: () => void
 }
@@ -42,7 +42,9 @@ const actionIcons: Record<string, string> = {
   callmom: '📞',
   family: '👨‍👩‍👧‍👦',
   flight: '✈️',
-  hotel: '🏨'
+  hotel: '🏨',
+  atm: '🏧',
+  water: '💧'
 }
 
 const getTrophyXp = (tier: TierType): number => {
@@ -97,12 +99,11 @@ export function ActionCard({ action, userId, onComplete, onXpGain, onRemove }: P
       showXpGain(totalXp)
       onXpGain(totalXp, false, 0) // Level up handled by parent
 
-      onComplete()
+      await onComplete()
     } catch (error) {
       console.error('Failed to complete action:', error)
-    } finally {
-      setCompleting(false)
     }
+    setCompleting(false)
   }
 
   const icon = action.icon_name ? actionIcons[action.icon_name] || '⭐' : '⭐'

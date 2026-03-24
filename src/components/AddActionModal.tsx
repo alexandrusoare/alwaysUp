@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import type { ActionWithProgress } from '../types/database'
 import { PixelTrophy } from './PixelTrophy'
 
@@ -35,13 +35,22 @@ const actionIcons: Record<string, string> = {
   callmom: '📞',
   family: '👨‍👩‍👧‍👦',
   flight: '✈️',
-  hotel: '🏨'
+  hotel: '🏨',
+  atm: '🏧',
+  water: '💧'
 }
 
 export function AddActionModal({ isOpen, onClose, allActions, activeActionIds, onSave }: Props) {
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set(activeActionIds))
   const [saving, setSaving] = useState(false)
+
+  // Sync selected with activeActionIds when modal opens or activeActionIds changes
+  useEffect(() => {
+    if (isOpen) {
+      setSelected(new Set(activeActionIds))
+    }
+  }, [isOpen, activeActionIds])
 
   const filteredActions = useMemo(() => {
     if (!search.trim()) return allActions

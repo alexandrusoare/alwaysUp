@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 export function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [gender, setGender] = useState<'male' | 'female' | null>(null)
   const [isRegister, setIsRegister] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -16,8 +17,14 @@ export function Login() {
     setError('')
     setLoading(true)
 
+    if (isRegister && !gender) {
+      setError('Please select your gender')
+      setLoading(false)
+      return
+    }
+
     const { error } = isRegister
-      ? await signUp(email, password)
+      ? await signUp(email, password, gender)
       : await signIn(email, password)
 
     if (error) {
@@ -66,6 +73,28 @@ export function Login() {
               placeholder="******"
             />
           </div>
+
+          {isRegister && (
+            <div className="form-group">
+              <label>Gender</label>
+              <div className="gender-selector">
+                <button
+                  type="button"
+                  className={`gender-btn male ${gender === 'male' ? 'selected' : ''}`}
+                  onClick={() => setGender('male')}
+                >
+                  <div className="pixel-male-symbol" />
+                </button>
+                <button
+                  type="button"
+                  className={`gender-btn female ${gender === 'female' ? 'selected' : ''}`}
+                  onClick={() => setGender('female')}
+                >
+                  <div className="pixel-female-symbol" />
+                </button>
+              </div>
+            </div>
+          )}
 
           {error && <p className="error-message">{error}</p>}
 

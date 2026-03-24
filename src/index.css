@@ -310,6 +310,188 @@ p {
   color: var(--color-accent);
 }
 
+/* Gender Selector */
+.gender-selector {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.gender-btn {
+  width: 70px;
+  height: 70px;
+  border: 4px solid #556;
+  background: var(--color-bg-dark);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.gender-btn.male {
+  border-color: #3b82f6;
+}
+
+.gender-btn.female {
+  border-color: #ec4899;
+}
+
+.gender-btn:hover {
+  transform: scale(1.05);
+}
+
+.gender-btn.male:hover {
+  background: rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.gender-btn.female:hover {
+  background: rgba(236, 72, 153, 0.1);
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.3);
+}
+
+.gender-btn.selected.male {
+  background: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+}
+
+.gender-btn.selected.female {
+  background: rgba(236, 72, 153, 0.2);
+  box-shadow: 0 0 15px rgba(236, 72, 153, 0.5);
+}
+
+/* Pixel Gender Symbols - True pixel art using box-shadow */
+.pixel-male-symbol,
+.pixel-female-symbol {
+  position: relative;
+  width: 28px;
+  height: 36px;
+}
+
+/* Male symbol ♂ - circle with arrow pointing up-right */
+.pixel-male-symbol::before {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: transparent;
+  left: 0;
+  top: 4px;
+  box-shadow:
+    /* Circle - top row */
+    4px 8px 0 #3b82f6,
+    8px 8px 0 #3b82f6,
+    /* Circle - second row */
+    0px 12px 0 #3b82f6,
+    12px 12px 0 #3b82f6,
+    /* Circle - third row */
+    0px 16px 0 #3b82f6,
+    12px 16px 0 #3b82f6,
+    /* Circle - fourth row */
+    0px 20px 0 #3b82f6,
+    12px 20px 0 #3b82f6,
+    /* Circle - bottom row */
+    4px 24px 0 #3b82f6,
+    8px 24px 0 #3b82f6,
+    /* Arrow diagonal from circle */
+    16px 8px 0 #3b82f6,
+    20px 4px 0 #3b82f6,
+    /* Arrow head - horizontal part */
+    20px 0px 0 #3b82f6,
+    24px 0px 0 #3b82f6,
+    /* Arrow head - vertical part */
+    24px 4px 0 #3b82f6,
+    24px 8px 0 #3b82f6;
+}
+
+/* Female symbol ♀ - circle with cross below */
+.pixel-female-symbol::before {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: transparent;
+  left: 4px;
+  top: 0;
+  box-shadow:
+    /* Circle - top row */
+    4px 0px 0 #ec4899,
+    8px 0px 0 #ec4899,
+    /* Circle - second row */
+    0px 4px 0 #ec4899,
+    12px 4px 0 #ec4899,
+    /* Circle - third row */
+    0px 8px 0 #ec4899,
+    12px 8px 0 #ec4899,
+    /* Circle - fourth row */
+    0px 12px 0 #ec4899,
+    12px 12px 0 #ec4899,
+    /* Circle - bottom row */
+    4px 16px 0 #ec4899,
+    8px 16px 0 #ec4899,
+    /* Vertical stem */
+    8px 20px 0 #ec4899,
+    8px 24px 0 #ec4899,
+    8px 28px 0 #ec4899,
+    /* Horizontal cross bar */
+    4px 24px 0 #ec4899,
+    12px 24px 0 #ec4899;
+}
+
+/* Profile Edit */
+.profile-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.edit-profile-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.edit-profile-btn:hover {
+  opacity: 1;
+}
+
+.profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.profile-edit-form .pixel-input {
+  max-width: 200px;
+}
+
+.profile-edit-form .gender-selector {
+  justify-content: flex-start;
+}
+
+.profile-edit-form .gender-btn {
+  width: 50px;
+  height: 50px;
+}
+
+.profile-edit-form .pixel-male-symbol,
+.profile-edit-form .pixel-female-symbol {
+  transform: scale(0.7);
+}
+
+.profile-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+
 /* ============================================
    LOADING / ERROR STATES
    ============================================ */
@@ -443,30 +625,71 @@ p {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+}
+
+.pixel-hair {
+  width: 28px;
+  height: 8px;
+  background: #4a3728;
+  border: 3px solid #333;
+  border-bottom: none;
+  margin-bottom: -3px;
+  z-index: 1;
+}
+
+.pixel-character.female .pixel-hair {
+  width: 32px;
+  height: 12px;
+  background: #8b4513;
+  border-radius: 4px 4px 0 0;
+  box-shadow:
+    -4px 8px 0 #8b4513,
+    4px 8px 0 #8b4513,
+    -4px 16px 0 #8b4513,
+    4px 16px 0 #8b4513;
 }
 
 .pixel-head {
   width: 24px;
   height: 24px;
   background: #ffd5b5;
-  border: 4px solid #333;
+  border: 3px solid #333;
   border-radius: 2px;
+  position: relative;
 }
 
 .pixel-body {
-  width: 32px;
-  height: 20px;
-  background: var(--color-accent);
-  border: 4px solid #333;
+  width: 28px;
+  height: 18px;
+  background: #3b82f6;
+  border: 3px solid #333;
   margin-top: -2px;
 }
 
+.pixel-character.female .pixel-body {
+  background: #ec4899;
+  border-radius: 0 0 4px 4px;
+}
+
 .pixel-legs {
-  width: 24px;
-  height: 12px;
-  background: #445;
-  border: 4px solid #333;
+  display: flex;
+  gap: 2px;
   margin-top: -2px;
+}
+
+.pixel-legs::before,
+.pixel-legs::after {
+  content: '';
+  width: 10px;
+  height: 14px;
+  background: #445;
+  border: 3px solid #333;
+}
+
+.pixel-character.female .pixel-legs::before,
+.pixel-character.female .pixel-legs::after {
+  background: #334;
 }
 
 .avatar-level {
@@ -709,6 +932,91 @@ p {
   height: 100%;
   transition: width 0.3s ease;
   box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2);
+}
+
+/* ============================================
+   WATER TRACKING CARD
+   ============================================ */
+.water-card {
+  border-color: #38bdf8;
+}
+
+.water-card.completed {
+  border-color: #22c55e;
+}
+
+.water-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.water-cups {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.water-cup {
+  font-size: 20px;
+  opacity: 0.3;
+  transition: all 0.2s;
+  filter: grayscale(100%);
+}
+
+.water-cup.filled {
+  opacity: 1;
+  filter: grayscale(0%);
+  animation: cupFill 0.3s ease;
+}
+
+@keyframes cupFill {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.water-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8px;
+  color: var(--color-text-dim);
+}
+
+.water-ml {
+  color: #38bdf8;
+}
+
+.water-cups-text {
+  color: var(--color-text-dim);
+}
+
+.water-bar {
+  width: 100%;
+  height: 8px;
+  background: #223;
+  border: 2px solid #334;
+  overflow: hidden;
+}
+
+.water-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+  transition: width 0.3s ease;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2);
+}
+
+.water-btn {
+  background: #38bdf8 !important;
+}
+
+.water-btn:hover:not(:disabled) {
+  background: #0ea5e9 !important;
+}
+
+.water-btn.done {
+  background: var(--color-accent) !important;
 }
 
 /* ============================================
