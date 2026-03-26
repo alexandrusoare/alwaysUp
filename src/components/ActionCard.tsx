@@ -44,7 +44,9 @@ const actionIcons: Record<string, string> = {
   flight: '✈️',
   hotel: '🏨',
   atm: '🏧',
-  water: '💧'
+  water: '💧',
+  acupuncture: '🪡',
+  meeting: '🤵'
 }
 
 const getTrophyXp = (tier: TierType): number => {
@@ -79,8 +81,9 @@ export function ActionCard({ action, userId, onComplete, onXpGain, onRemove }: P
     try {
       const result = await completeAction(action.id, action.progress, action.tiers)
 
-      // Calculate total XP gained
-      let totalXp = XP_VALUES.ACTION_COMPLETE
+      // Calculate total XP gained (use action's xp_reward)
+      const actionXp = action.xp_reward ?? 5
+      let totalXp = actionXp
       let trophyXp = 0
 
       if (result.unlockedTier) {
@@ -144,7 +147,7 @@ export function ActionCard({ action, userId, onComplete, onXpGain, onRemove }: P
 
       <div className="action-progress">
         {allTiersUnlocked ? (
-          <span className="progress-text platinum-complete">All trophies unlocked! (+5 XP)</span>
+          <span className="progress-text platinum-complete">All trophies unlocked! (+{action.xp_reward ?? 5} XP)</span>
         ) : nextTier && (
           <>
             <span className="progress-text">
@@ -165,7 +168,7 @@ export function ActionCard({ action, userId, onComplete, onXpGain, onRemove }: P
         onClick={handleComplete}
         disabled={completing || completedToday}
       >
-        {completedToday ? 'Done Today ✓' : completing ? '...' : `Complete (+${XP_VALUES.ACTION_COMPLETE} XP)`}
+        {completedToday ? 'Done Today ✓' : completing ? '...' : `Complete (+${action.xp_reward ?? 5} XP)`}
       </button>
     </div>
   )

@@ -50,7 +50,8 @@ export function WaterActionCard({ action, userId, onComplete, onXpGain, onRemove
       try {
         const result = await completeAction(action.id, action.progress, action.tiers)
 
-        let totalXp = XP_VALUES.ACTION_COMPLETE
+        const actionXp = action.xp_reward ?? 5
+        let totalXp = actionXp
         let trophyXp = 0
 
         if (result.unlockedTier) {

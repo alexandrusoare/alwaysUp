@@ -22,6 +22,9 @@ export function Layout({ children }: Props) {
           <NavLink to="/trophies" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
             Trophies
           </NavLink>
+          <NavLink to="/admin" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            Admin
+          </NavLink>
         </div>
         <button className="nav-logout pixel-btn-small" onClick={signOut}>
           Logout

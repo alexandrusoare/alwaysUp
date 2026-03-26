@@ -1,5 +1,7 @@
+-- ============================================
 -- AlwaysUp Database Schema
--- Run this in your Supabase SQL Editor
+-- Single source of truth for all tables
+-- ============================================
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -14,6 +16,9 @@ CREATE TABLE actions (
   name VARCHAR(100) NOT NULL,
   description TEXT,
   icon_name VARCHAR(50),
+  xp_reward INTEGER NOT NULL DEFAULT 5,    -- XP gained when completing this action
+  special_type VARCHAR(50) DEFAULT NULL,  -- NULL = normal, 'water_tracking' = water tracking
+  special_config JSONB DEFAULT NULL,       -- Config for special actions
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -57,7 +62,7 @@ CREATE TABLE user_stats (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- User active actions (which actions show on Today page - resets daily)
+-- User active actions (which actions show on Today page)
 CREATE TABLE user_active_actions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -65,6 +70,19 @@ CREATE TABLE user_active_actions (
   added_date DATE DEFAULT CURRENT_DATE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(user_id, action_id, added_date)
+);
+
+-- Daily tracking for special actions (water, etc.)
+CREATE TABLE user_daily_tracking (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  action_id UUID REFERENCES actions(id) ON DELETE CASCADE NOT NULL,
+  date DATE NOT NULL DEFAULT CURRENT_DATE,
+  current_value INTEGER NOT NULL DEFAULT 0,
+  goal_reached BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, action_id, date)
 );
 
 -- ============================================
@@ -77,6 +95,8 @@ CREATE INDEX idx_user_trophies_unlocked_at ON user_trophies(unlocked_at DESC);
 CREATE INDEX idx_action_tiers_action_id ON action_tiers(action_id);
 CREATE INDEX idx_user_stats_user_id ON user_stats(user_id);
 CREATE INDEX idx_user_active_actions_user_id ON user_active_actions(user_id);
+CREATE INDEX idx_user_active_actions_date ON user_active_actions(user_id, added_date);
+CREATE INDEX idx_user_daily_tracking_lookup ON user_daily_tracking(user_id, action_id, date);
 
 -- ============================================
 -- ROW LEVEL SECURITY
@@ -88,6 +108,7 @@ ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_trophies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_stats ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_active_actions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_daily_tracking ENABLE ROW LEVEL SECURITY;
 
 -- Actions and tiers are read-only for all authenticated users
 CREATE POLICY "Actions are viewable by authenticated users"
@@ -159,11 +180,23 @@ CREATE POLICY "Users can delete own active actions"
   TO authenticated
   USING (auth.uid() = user_id);
 
+-- Users can manage their own daily tracking
+CREATE POLICY "Users can view own daily tracking"
+  ON user_daily_tracking FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own daily tracking"
+  ON user_daily_tracking FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own daily tracking"
+  ON user_daily_tracking FOR UPDATE
+  USING (auth.uid() = user_id);
+
 -- ============================================
--- SEED DATA
+-- SEED DATA: ACTIONS (29 total)
 -- ============================================
 
--- Insert predefined actions
 INSERT INTO actions (id, name, description, icon_name) VALUES
   ('a1000000-0000-0000-0000-000000000001', 'Make your bed', 'Start the day with discipline', 'bed'),
   ('a1000000-0000-0000-0000-000000000002', 'Wash dishes', 'Clean those plates!', 'dishes'),
@@ -189,9 +222,21 @@ INSERT INTO actions (id, name, description, icon_name) VALUES
   ('a1000000-0000-0000-0000-000000000022', 'Call your mom', 'Family connection', 'callmom'),
   ('a1000000-0000-0000-0000-000000000023', 'See your family', 'Quality family time', 'family'),
   ('a1000000-0000-0000-0000-000000000024', 'Book flight tickets', 'Adventure awaits', 'flight'),
-  ('a1000000-0000-0000-0000-000000000025', 'Book accommodation', 'Plan your stay', 'hotel');
+  ('a1000000-0000-0000-0000-000000000025', 'Book accommodation', 'Plan your stay', 'hotel'),
+  ('a1000000-0000-0000-0000-000000000026', 'Withdraw Money', 'Withdraw cash from ATM', 'atm'),
+  ('a1000000-0000-0000-0000-000000000027', 'Drink Water', 'Stay hydrated! Goal: 2L (8 cups) per day', 'water'),
+  ('a1000000-0000-0000-0000-000000000028', 'Go to acupuncture', 'Needle your way to health', 'acupuncture'),
+  ('a1000000-0000-0000-0000-000000000029', 'Business meeting', 'Close deals and build partnerships', 'meeting');
 
--- Insert tiers for each action with unique funny titles
+-- Set special type for water tracking
+UPDATE actions
+SET special_type = 'water_tracking',
+    special_config = '{"unit": "ml", "per_increment": 250, "daily_goal": 2000, "increment_name": "cup"}'::jsonb
+WHERE id = 'a1000000-0000-0000-0000-000000000027';
+
+-- ============================================
+-- SEED DATA: ACTION TIERS
+-- ============================================
 
 -- Make your bed
 INSERT INTO action_tiers (action_id, tier_type, target_count, funny_title) VALUES
@@ -235,7 +280,7 @@ INSERT INTO action_tiers (action_id, tier_type, target_count, funny_title) VALUE
   ('a1000000-0000-0000-0000-000000000006', 'gold', 30, 'Stove Sorcerer'),
   ('a1000000-0000-0000-0000-000000000006', 'platinum', 100, 'Kitchen King');
 
--- Contribute to code (Game Master trophies)
+-- Contribute to code
 INSERT INTO action_tiers (action_id, tier_type, target_count, funny_title) VALUES
   ('a1000000-0000-0000-0000-000000000007', 'bronze', 1, 'First Commit'),
   ('a1000000-0000-0000-0000-000000000007', 'silver', 5, 'Bug Squasher'),
@@ -367,3 +412,31 @@ INSERT INTO action_tiers (action_id, tier_type, target_count, funny_title) VALUE
   ('a1000000-0000-0000-0000-000000000025', 'silver', 5, 'Hotel Hunter'),
   ('a1000000-0000-0000-0000-000000000025', 'gold', 15, 'Stay Specialist'),
   ('a1000000-0000-0000-0000-000000000025', 'platinum', 50, 'Accommodation Ace');
+
+-- Withdraw Money
+INSERT INTO action_tiers (action_id, tier_type, target_count, funny_title) VALUES
+  ('a1000000-0000-0000-0000-000000000026', 'bronze', 5, 'Cash Starter'),
+  ('a1000000-0000-0000-0000-000000000026', 'silver', 25, 'ATM Regular'),
+  ('a1000000-0000-0000-0000-000000000026', 'gold', 100, 'Cash Handler'),
+  ('a1000000-0000-0000-0000-000000000026', 'platinum', 365, 'Money Master');
+
+-- Drink Water (tiers based on days goal was reached)
+INSERT INTO action_tiers (action_id, tier_type, target_count, funny_title) VALUES
+  ('a1000000-0000-0000-0000-000000000027', 'bronze', 7, 'Hydration Rookie'),
+  ('a1000000-0000-0000-0000-000000000027', 'silver', 30, 'Water Warrior'),
+  ('a1000000-0000-0000-0000-000000000027', 'gold', 100, 'Hydration Hero'),
+  ('a1000000-0000-0000-0000-000000000027', 'platinum', 365, 'Aqua Legend');
+
+-- Go to acupuncture
+INSERT INTO action_tiers (action_id, tier_type, target_count, funny_title) VALUES
+  ('a1000000-0000-0000-0000-000000000028', 'bronze', 3, 'Needle Newbie'),
+  ('a1000000-0000-0000-0000-000000000028', 'silver', 10, 'Pin Cushion'),
+  ('a1000000-0000-0000-0000-000000000028', 'gold', 30, 'Meridian Master'),
+  ('a1000000-0000-0000-0000-000000000028', 'platinum', 100, 'Qi Flow King');
+
+-- Business meeting
+INSERT INTO action_tiers (action_id, tier_type, target_count, funny_title) VALUES
+  ('a1000000-0000-0000-0000-000000000029', 'bronze', 5, 'Boardroom Beginner'),
+  ('a1000000-0000-0000-0000-000000000029', 'silver', 20, 'Deal Maker'),
+  ('a1000000-0000-0000-0000-000000000029', 'gold', 50, 'Corporate Crusher'),
+  ('a1000000-0000-0000-0000-000000000029', 'platinum', 200, 'Business Mogul');

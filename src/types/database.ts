@@ -14,6 +14,7 @@ export interface Action {
   name: string
   description: string | null
   icon_name: string | null
+  xp_reward: number
   special_type: SpecialActionType
   special_config: WaterTrackingConfig | null
   created_at: string

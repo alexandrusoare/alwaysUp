@@ -80,8 +80,8 @@ export function useWaterTracking(userId: string | undefined, actionId: string | 
 
         if (error) throw error
       } else {
-        // Insert new record
-        const { error } = await supabase
+        // Insert new record and return it
+        const { data, error } = await supabase
           .from('user_daily_tracking')
           .insert({
             user_id: userId,
@@ -90,21 +90,23 @@ export function useWaterTracking(userId: string | undefined, actionId: string | 
             current_value: newValue,
             goal_reached: goalReached
           })
+          .select()
+          .single()
 
         if (error) throw error
+
+        // Set the tracking with the returned data (includes ID)
+        setTracking(data as UserDailyTracking)
+        return { goalJustReached: goalReached && !wasGoalReached }
       }
 
-      // Optimistically update local state
-      setTracking(prev => ({
-        id: prev?.id ?? '',
-        user_id: userId,
-        action_id: actionId,
-        date: today,
+      // Update local state for existing record
+      setTracking(prev => prev ? {
+        ...prev,
         current_value: newValue,
         goal_reached: goalReached,
-        created_at: prev?.created_at ?? new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }))
+      } : null)
 
       // Return if goal was just reached (for XP/trophy logic)
       return { goalJustReached: goalReached && !wasGoalReached }

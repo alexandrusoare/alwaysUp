@@ -34,7 +34,9 @@ const actionIcons: Record<string, string> = {
   flight: '✈️',
   hotel: '🏨',
   atm: '🏧',
-  water: '💧'
+  water: '💧',
+  acupuncture: '🪡',
+  meeting: '🤵'
 }
 
 export function Actions() {

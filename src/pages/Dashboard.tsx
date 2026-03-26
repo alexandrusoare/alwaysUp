@@ -45,8 +45,8 @@ export function Dashboard() {
     )
   }
 
-  // Get recent trophies (last 5)
-  const recentTrophies = trophies.slice(0, 5)
+  // Get recent trophies (last 4)
+  const recentTrophies = trophies.slice(0, 4)
 
   // Get today's completed actions
   const today = new Date().toDateString()

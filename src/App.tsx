@@ -7,6 +7,7 @@ import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
 import { Actions } from './pages/Actions'
 import { Trophies } from './pages/Trophies'
+import { Admin } from './pages/Admin'
 import './index.css'
 
 function App() {
@@ -42,6 +43,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Trophies />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Admin />
                 </Layout>
               </ProtectedRoute>
             }
